@@ -15,16 +15,16 @@ void init_cpu(CortexM0_CPU *cpu) {
 
 // ADD Instruction
 void ADD(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm) {
-  int32_t op1 = cpu->R[Rn];
-  int32_t op2 = cpu->R[Rm];
-  uint64_t result = (uint64_t)op1 + (uint64_t)op2;
-  printf("here is the operation: %d + %d = %ld \n", op1, op2, result);
+  uint32_t op1 = cpu->R[Rn];
+  uint32_t op2 = cpu->R[Rm];
+  int64_t result = (int64_t)op1 + (int64_t)op2;
+  printf("here is the operation: %ld + %ld = %ld \n", (int64_t)op1, (int64_t)op2, result);
   // check for carry
   _Bool carry = (result > 0xFFFFFFFF);
   if (carry){printf("a carry is yeild \n");}
   
   // cast the result to 32bit and check for overflow
-  result = (int32_t)result;
+  result = (uint32_t)result;
   printf("the result after the casting: %ld\n",result);
   _Bool overflow = (((op1 & 0x80000000) == (op2 & 0x80000000)) && (result&0x80000000));
   cpu->R[Rd] = result;
@@ -32,18 +32,20 @@ void ADD(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm) {
 }
 
 // SUB Instruction
-// void SUB(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm) {
-//   uint32_t op1 = cpu->R[Rn];
-//   uint32_t op2 = cpu->R[Rm];
-//   uint64_t result = op1 - op2;
-//   // check for carry
-//   _Bool carry = (result > 0x80000000);
-//   // cast the result to 32bit and check for overflow
-//   result = (uint32_t)result;
-//   _Bool overflow = (((op1 & 0x80000000) == (op2 & 0x80000000)) && (result&0x80000000));
-//   cpu->R[Rd] = result;
-//   update_flags(cpu, result, carry, overflow);
-// }
+void SUB(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm) {
+  uint32_t op1 = cpu->R[Rn];
+  uint32_t op2 = cpu->R[Rm];
+  uint64_t result = (uint64_t)op1 - (uint64_t)op2;
+  printf("here is the operation: %ld - %ld = %ld \n", (int64_t)op1, (int64_t)op2, result);
+  // check for carry
+  _Bool carry = (result > 0x80000000);
+  // cast the result to 32bit and check for overflow
+  result = (uint32_t)result;
+  _Bool overflow = (((op1 & 0x80000000) == (op2 & 0x80000000)) && ((result&0x80000000) != (op1 & 0x80000000)));
+  printf("overflow : %d \n", overflow);
+  cpu->R[Rd] = result;
+  update_flags(cpu, result, carry, overflow);
+}
 
 // // CMP Instruction (Compare: Rn - Rm)
 // void CMP(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm) {
@@ -103,9 +105,9 @@ int main() {
     // cpu.R[0] = 0x7;  // Load a negative number
     // update_flags(&cpu, cpu.R[0], 0, 0);
     // printf("cpu status after operation: \n");
-    cpu.R[1] = 0x7FFFFFFF;
-    cpu.R[2] = 0X2;
-    ADD(&cpu, 0, 1, 2);
+    cpu.R[2] = 0xFFFFFFFF;
+    cpu.R[1] = 0X0;
+    SUB(&cpu, 0, 1, 2);
     print_cpu_state(&cpu);
 
     return 0;
