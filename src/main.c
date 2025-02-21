@@ -26,7 +26,7 @@ void ADD(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm) {
   // cast the result to 32bit and check for overflow
   result = (uint32_t)result;
   printf("the result after the casting: %ld\n",result);
-  _Bool overflow = (((op1 & 0x80000000) == (op2 & 0x80000000)) && (result&0x80000000));
+  _Bool overflow = (((op1 & 0x80000000) == (op2 & 0x80000000)) && ((result&0x80000000) != (op1 & 0x80000000)));
   cpu->R[Rd] = result;
   update_flags(cpu, result, carry, overflow);
 }
@@ -35,23 +35,27 @@ void ADD(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm) {
 void SUB(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm) {
   uint32_t op1 = cpu->R[Rn];
   uint32_t op2 = cpu->R[Rm];
-  uint64_t result = (uint64_t)op1 - (uint64_t)op2;
-  printf("here is the operation: %ld - %ld = %ld \n", (int64_t)op1, (int64_t)op2, result);
-  // check for carry
-  _Bool carry = (result > 0x80000000);
-  // cast the result to 32bit and check for overflow
-  result = (uint32_t)result;
+  uint32_t result = op1 - op2;
+  printf("SUB operation: %0x - %0x = %0x \n", op1, op2, result);
+  // Carry is inverted for SUB in ARM
+  _Bool carry = !(op1 < op2);
+  // An overflow is set if the ops have the same sign, that is different than the result sign
   _Bool overflow = (((op1 & 0x80000000) == (op2 & 0x80000000)) && ((result&0x80000000) != (op1 & 0x80000000)));
-  printf("overflow : %d \n", overflow);
   cpu->R[Rd] = result;
   update_flags(cpu, result, carry, overflow);
 }
 
-// // CMP Instruction (Compare: Rn - Rm)
-// void CMP(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm) {
-//   Rd = Rn + Rm;
-//   update_flags(cpu, Rd);
-// }
+// CMP Instruction (Compare: Rn - Rm)
+void CMP(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm) {
+  uint32_t op1 = cpu->R[Rn];
+  uint32_t op2 = cpu->R[Rm];
+  uint32_t result = op1 - op2;
+  printf("here is the operation: %d - %d = %d \n", op1, op2, result);
+  // check for carry
+  _Bool carry = !(op1 < op2);
+  _Bool overflow = (((op1 & 0x80000000) == (op2 & 0x80000000)) && ((result&0x80000000) != (op1 & 0x80000000)));
+  update_flags(cpu, result, carry, overflow);
+}
 
 // Print CPU state (for debugging)
 void print_cpu_state(CortexM0_CPU *cpu) {
@@ -105,8 +109,8 @@ int main() {
     // cpu.R[0] = 0x7;  // Load a negative number
     // update_flags(&cpu, cpu.R[0], 0, 0);
     // printf("cpu status after operation: \n");
-    cpu.R[2] = 0xFFFFFFFF;
-    cpu.R[1] = 0X0;
+    cpu.R[2] = 0x7FFFFFFF;
+    cpu.R[1] = 0X1;
     SUB(&cpu, 0, 1, 2);
     print_cpu_state(&cpu);
 

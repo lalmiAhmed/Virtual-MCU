@@ -53,3 +53,9 @@ Virtual ARM cortex-M0 MCU implemented in C programming language
 - GPIO (Simple LED toggle example).
 - UART (Simulated serial console).
 - SysTick (Basic timer interrupts).
+
+
+🎯 Next Steps
+
+    Implement logical instructions (AND, ORR, EOR, TST).
+    Implement memory access instructions (LDR, STR).
