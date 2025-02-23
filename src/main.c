@@ -17,16 +17,14 @@ void init_cpu(CortexM0_CPU *cpu) {
 void ADD(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm) {
   uint32_t op1 = cpu->R[Rn];
   uint32_t op2 = cpu->R[Rm];
-  int64_t result = (int64_t)op1 + (int64_t)op2;
-  printf("here is the operation: %ld + %ld = %ld \n", (int64_t)op1, (int64_t)op2, result);
+  uint64_t result = (uint64_t)op1 + (uint64_t)op2;
+  // printf("here is the operation: %ld + %ld = %ld \n", (int64_t)op1, (int64_t)op2, result);
   // check for carry
-  _Bool carry = (result > 0xFFFFFFFF);
-  if (carry){printf("a carry is yeild \n");}
-  
+  _Bool carry = (result >= UINT64_C(0x100000000));
+  _Bool overflow = (((op1 & 0x80000000) == (op2 & 0x80000000)) && ((result&0x80000000) != (op1 & 0x80000000)));
+
   // cast the result to 32bit and check for overflow
   result = (uint32_t)result;
-  printf("the result after the casting: %ld\n",result);
-  _Bool overflow = (((op1 & 0x80000000) == (op2 & 0x80000000)) && ((result&0x80000000) != (op1 & 0x80000000)));
   cpu->R[Rd] = result;
   update_flags(cpu, result, carry, overflow);
 }
@@ -56,6 +54,60 @@ void CMP(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm) {
   _Bool overflow = (((op1 & 0x80000000) == (op2 & 0x80000000)) && ((result&0x80000000) != (op1 & 0x80000000)));
   update_flags(cpu, result, carry, overflow);
 }
+
+// Logical AND
+void AND(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd){
+  uint32_t op1 = cpu->R[Rn];
+  uint32_t op2 = cpu->R[Rm];
+  uint32_t result = op1 & op2;
+  _Bool carry = cpu->APSR.Bits.APSR_C;   // Keep previous carry unchanged
+  _Bool overflow = cpu->APSR.Bits.APSR_V; // Keep previous overflow unchanged
+  cpu->R[Rd] = result;
+  update_flags(cpu, result, carry, overflow);
+}
+
+// Logical OR
+void ORR(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd){
+  uint32_t op1 = cpu->R[Rn];
+  uint32_t op2 = cpu->R[Rm];
+  uint32_t result = op1 | op2;
+  _Bool carry = cpu->APSR.Bits.APSR_C;   // Keep previous carry unchanged
+  _Bool overflow = cpu->APSR.Bits.APSR_V; // Keep previous overflow unchanged
+  cpu->R[Rd] = result;
+  update_flags(cpu, result, carry, overflow);
+}
+
+// Logical exclusive OR
+void EOR(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd){
+  uint32_t op1 = cpu->R[Rn];
+  uint32_t op2 = cpu->R[Rm];
+  uint32_t result = op1 ^ op2;
+  _Bool carry = cpu->APSR.Bits.APSR_C;   // Keep previous carry unchanged
+  _Bool overflow = cpu->APSR.Bits.APSR_V; // Keep previous overflow unchanged
+  cpu->R[Rd] = result;
+  update_flags(cpu, result, carry, overflow);
+}
+
+// Logical TST
+void TST(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm){
+  uint32_t op1 = cpu->R[Rn];
+  uint32_t op2 = cpu->R[Rm];
+  uint32_t result = op1 & op2;
+  _Bool carry = cpu->APSR.Bits.APSR_C;   // Keep previous carry unchanged
+  _Bool overflow = cpu->APSR.Bits.APSR_V; // Keep previous overflow unchanged
+  update_flags(cpu, result, carry, overflow);
+}
+
+
+// memory Access store
+void STR(){
+
+}
+
+void LDR(){
+  
+}
+
 
 // Print CPU state (for debugging)
 void print_cpu_state(CortexM0_CPU *cpu) {
@@ -109,9 +161,9 @@ int main() {
     // cpu.R[0] = 0x7;  // Load a negative number
     // update_flags(&cpu, cpu.R[0], 0, 0);
     // printf("cpu status after operation: \n");
-    cpu.R[2] = 0x7FFFFFFF;
-    cpu.R[1] = 0X1;
-    SUB(&cpu, 0, 1, 2);
+    cpu.R[2] = 0x33;
+    cpu.R[1] = 0X25;
+    AND(&cpu, 1, 2, 0);
     print_cpu_state(&cpu);
 
     return 0;

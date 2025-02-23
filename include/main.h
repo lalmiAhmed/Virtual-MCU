@@ -27,6 +27,11 @@ typedef struct {
 
 void init_cpu(CortexM0_CPU *cpu);
 void print_cpu_state(CortexM0_CPU *cpu);
+void update_flags(CortexM0_CPU *cpu, uint32_t result, _Bool carry, _Bool overflow);
 void ADD(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm);
 void SUB(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm);
-void update_flags(CortexM0_CPU *cpu, uint32_t result, _Bool carry, _Bool overflow);
+void CMP(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm);
+void AND(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd);
+void ORR(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd);
+void EOR(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd);
+void TST(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm);
