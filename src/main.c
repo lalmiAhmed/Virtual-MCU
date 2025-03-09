@@ -99,13 +99,59 @@ void TST(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm){
 }
 
 
-// memory Access store
-void STR(){
 
+/*
+Store the value in Rt to the momory address specified by Rm+Rn
+*/
+void STR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
+  // Ensure register is valid (not SP, LR, or PC)
+  if (Rt >= 13) {
+      printf("Invalid register for STR\n");
+      return;
+  }
+
+  // Compute memory address
+  uint32_t memory_address = cpu->R[Rm] + cpu->R[Rn];
+
+  // Check for alignment (Cortex-M0 usually requires word alignment for 32-bit stores)
+  if (memory_address % 4 != 0) {
+      printf("Unaligned memory access at 0x%08X\n", memory_address);
+      return;
+  }
+
+  // Store the 32-bit register value in memory
+  Memory[memory_address] = cpu->R[Rt] & 0xFF;
+  Memory[memory_address + 1] = (cpu->R[Rt] >> 8) & 0xFF;
+  Memory[memory_address + 2] = (cpu->R[Rt] >> 16) & 0xFF;
+  Memory[memory_address + 3] = (cpu->R[Rt] >> 24) & 0xFF;
 }
 
-void LDR(){
-  
+
+/*
+Load the value in the momory address specified by Rm+Rn to Rt
+*/
+void LDR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
+  // Ensure register is valid (not SP, LR, or PC)
+  if (Rt >= 13) {
+      printf("Invalid register for LDR\n");
+      return;
+  }
+
+  // Compute memory address
+  uint32_t memory_address = cpu->R[Rm] + cpu->R[Rn];
+
+  // Check for alignment (Cortex-M0 usually requires word alignment for 32-bit stores)
+  if (memory_address % 4 != 0) {
+    printf("Unaligned memory access at 0x%08X\n", memory_address);
+    return;
+  }
+
+  // Load the 32-bit value memory to the register
+  cpu->R[Rt] = Memory[memory_address] |
+                 (Memory[memory_address + 1] << 8) |
+                 (Memory[memory_address + 2] << 16) |
+                 (Memory[memory_address + 3] << 24);
+
 }
 
 
@@ -120,6 +166,17 @@ void print_cpu_state(CortexM0_CPU *cpu) {
         cpu->APSR.Bits.APSR_Z,
         cpu->APSR.Bits.APSR_C,
         cpu->APSR.Bits.APSR_V);
+}
+
+// Print Memory
+void print_memory(){
+  for(int i = 0; i < MEMORY_SIZE; i++){
+    printf("[%d] 0x%02X ",i, Memory[i]);
+    if(i % 8 == 0) {
+      printf("\n");
+    }
+  }
+  printf("\n");
 }
 
 // Example: Set flags based on a computation result
@@ -161,10 +218,20 @@ int main() {
     // cpu.R[0] = 0x7;  // Load a negative number
     // update_flags(&cpu, cpu.R[0], 0, 0);
     // printf("cpu status after operation: \n");
-    cpu.R[2] = 0x33;
-    cpu.R[1] = 0X25;
-    AND(&cpu, 1, 2, 0);
+    
+    cpu.R[1] = 0x453B;
+    cpu.R[2] = 0x10;
+    cpu.R[3] = 0X0;
+    STR(&cpu, 1, 2, 3);
+
+
+    Memory[20] = 0x3C;
+    Memory[21] = 0xFD;
+
+    cpu.R[2] = 0x14;
+    LDR(&cpu, 4, 2, 3);
     print_cpu_state(&cpu);
+    print_memory();
 
     return 0;
 }

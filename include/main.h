@@ -4,6 +4,8 @@
 #define C_MASK (1<<29)
 #define V_MASK (1<<28)
 
+#define MEMORY_SIZE 56
+
 // Application Program Status Register (Flags)
 typedef struct{
   uint32_t APSR_N:1; // Negative flag
@@ -25,6 +27,8 @@ typedef struct {
 } CortexM0_CPU;
 
 
+uint8_t Memory[MEMORY_SIZE];
+
 void init_cpu(CortexM0_CPU *cpu);
 void print_cpu_state(CortexM0_CPU *cpu);
 void update_flags(CortexM0_CPU *cpu, uint32_t result, _Bool carry, _Bool overflow);
@@ -35,3 +39,5 @@ void AND(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd);
 void ORR(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd);
 void EOR(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd);
 void TST(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm);
+void STR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
+void LDR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);

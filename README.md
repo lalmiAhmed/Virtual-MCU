@@ -57,5 +57,5 @@ Virtual ARM cortex-M0 MCU implemented in C programming language
 
 🎯 Next Steps
 
-    Implement logical instructions (AND, ORR, EOR, TST).
-    Implement memory access instructions (LDR, STR).
+    Implement load and store for other data types (8bit, 16bit)/ signed and unsigned:
+    https://developer.arm.com/documentation/ddi0419/c/Application-Level-Architecture/The-ARMv6-M-Instruction-Set/Load-and-store-instructions?lang=en
