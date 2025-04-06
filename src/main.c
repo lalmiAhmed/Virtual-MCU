@@ -3,6 +3,9 @@
 #include "main.h"
 
 
+/* Static function declaration */
+static _Bool check_memory_bounds(uint32_t address, uint32_t size);
+
 
 
 // Initialize CPU state
@@ -99,6 +102,9 @@ void TST(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm){
 }
 
 
+static _Bool check_memory_bounds(uint32_t address, uint32_t size) {
+  return (address + size - 1 < MEMORY_SIZE);
+}
 
 /*
 Store the value in Rt to the momory address specified by Rm+Rn
@@ -111,19 +117,74 @@ void STR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   }
 
   // Compute memory address
-  uint32_t memory_address = cpu->R[Rm] + cpu->R[Rn];
+  uint32_t addr = cpu->R[Rm] + cpu->R[Rn];
 
   // Check for alignment (Cortex-M0 usually requires word alignment for 32-bit stores)
-  if (memory_address % 4 != 0) {
-      printf("Unaligned memory access at 0x%08X\n", memory_address);
+  if (addr % WORD_SIZE != 0) {
+      printf("Unaligned memory access at 0x%08X\n", addr);
       return;
   }
 
+  // Check for memory boundry
+  if (!check_memory_bounds(addr, WORD_SIZE)) {
+    printf("Memory access out of bounds at 0x%08X\n", addr);
+    return;
+  }
+
   // Store the 32-bit register value in memory
-  Memory[memory_address] = cpu->R[Rt] & 0xFF;
-  Memory[memory_address + 1] = (cpu->R[Rt] >> 8) & 0xFF;
-  Memory[memory_address + 2] = (cpu->R[Rt] >> 16) & 0xFF;
-  Memory[memory_address + 3] = (cpu->R[Rt] >> 24) & 0xFF;
+  Memory[addr] = cpu->R[Rt] & 0xFF;
+  Memory[addr + 1] = (cpu->R[Rt] >> 8) & 0xFF;
+  Memory[addr + 2] = (cpu->R[Rt] >> 16) & 0xFF;
+  Memory[addr + 3] = (cpu->R[Rt] >> 24) & 0xFF;
+}
+
+
+/*
+Store the half word 16-bit value in Rt to the momory address specified by Rm+Rn
+*/
+void STRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
+  if (Rt >= 13) {
+      printf("Invalid register for STRH\n");
+      return;
+  }
+
+  uint32_t addr = cpu->R[Rn] + cpu->R[Rm];
+
+  if (addr % HALFWORD_SIZE != 0) {
+      printf("Unaligned STRH access at 0x%08X\n", addr);
+      return;
+  }
+
+    // Check for memory boundry
+    if (!check_memory_bounds(addr, HALFWORD_SIZE)) {
+      printf("Memory access out of bounds at 0x%08X\n", addr);
+      return;
+    }
+
+  uint16_t halfword = cpu->R[Rt] & 0xFFFF;
+
+  Memory[addr]     = (uint8_t)(halfword & 0xFF);
+  Memory[addr + 1] = (uint8_t)(halfword >> 8);
+}
+
+/*
+Store 8-bit value in Rt to the momory address specified by Rm+Rn
+*/
+void STRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
+  if (Rt >= 13) {
+      printf("Invalid register for STRB\n");
+      return;
+  }
+
+  uint32_t addr = cpu->R[Rn] + cpu->R[Rm];
+
+  // Check for memory boundry
+  if (!check_memory_bounds(addr, BYTE_SIZE)) {
+    printf("Memory access out of bounds at 0x%08X\n", addr);
+    return;
+  }
+
+  Memory[addr]= (uint8_t)(cpu->R[Rt] & 0xFF);
 }
 
 
@@ -138,20 +199,126 @@ void LDR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   }
 
   // Compute memory address
-  uint32_t memory_address = cpu->R[Rm] + cpu->R[Rn];
+  uint32_t addr = cpu->R[Rm] + cpu->R[Rn];
 
   // Check for alignment (Cortex-M0 usually requires word alignment for 32-bit stores)
-  if (memory_address % 4 != 0) {
-    printf("Unaligned memory access at 0x%08X\n", memory_address);
+  if (addr % WORD_SIZE != 0) {
+    printf("Unaligned memory access at 0x%08X\n", addr);
+    return;
+  }
+
+  // Check for memory boundry
+  if (!check_memory_bounds(addr, WORD_SIZE)) {
+    printf("Memory access out of bounds at 0x%08X\n", addr);
     return;
   }
 
   // Load the 32-bit value memory to the register
-  cpu->R[Rt] = Memory[memory_address] |
-                 (Memory[memory_address + 1] << 8) |
-                 (Memory[memory_address + 2] << 16) |
-                 (Memory[memory_address + 3] << 24);
+  cpu->R[Rt] = Memory[addr] |
+                 (Memory[addr + 1] << 8) |
+                 (Memory[addr + 2] << 16) |
+                 (Memory[addr + 3] << 24);
 
+}
+
+/*
+Load the 16-bit unsigned halfword value in the momory address specified by Rm+Rn to Rt
+*/
+void LDRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
+  // Ensure register is valid (not SP, LR, or PC)
+  if (Rt >= 13) {
+      printf("Invalid register for LDR\n");
+      return;
+  }
+
+  // Compute memory address
+  uint32_t addr = cpu->R[Rm] + cpu->R[Rn];
+
+  // Check for alignment (Cortex-M0 usually requires word alignment for 32-bit stores)
+  if (addr % HALFWORD_SIZE != 0) {
+    printf("Unaligned memory access at 0x%08X\n", addr);
+    return;
+  }
+
+  // Check for memory boundry
+  if (!check_memory_bounds(addr, HALFWORD_SIZE)) {
+    printf("Memory access out of bounds at 0x%08X\n", addr);
+    return;
+  }
+
+  // Load the 16-bit value memory to the register
+  cpu->R[Rt] = (uint16_t)Memory[addr] |
+                 (Memory[addr + 1] << 8);
+}
+
+/*
+Load the 16-bit signed halfword value in the momory address specified by Rm+Rn to Rt
+*/
+
+void LDRSH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
+  if (Rt >= 13) {
+      printf("Invalid register for LDRSH\n");
+      return;
+  }
+
+  uint32_t addr = cpu->R[Rn] + cpu->R[Rm];
+
+  if (addr % 2 != 0) {
+      printf("Unaligned LDRSH access at 0x%08X\n", addr);
+      return;
+  }
+
+  int16_t halfword = (int16_t)(Memory[addr] |
+                               (Memory[addr + 1] << 8));
+
+  cpu->R[Rt] = (int32_t)halfword;  // Sign-extend to 32-bit
+}
+
+/*
+Load the 8-bit unsigned value in the momory address specified by Rm+Rn to Rt
+*/
+void LDRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
+  // Ensure register is valid (not SP, LR, or PC)
+  if (Rt >= 13) {
+      printf("Invalid register for LDRB\n");
+      return;
+  }
+
+  // Compute memory address
+  uint32_t addr = cpu->R[Rm] + cpu->R[Rn];
+
+  // Check for memory boundry
+  if (!check_memory_bounds(addr, BYTE_SIZE)) {
+    printf("Memory access out of bounds at 0x%08X\n", addr);
+    return;
+  }
+
+  // Load the 8-bit value memory to the register
+  cpu->R[Rt] = (uint8_t)Memory[addr];
+}
+
+/*
+Load the 8-bit signed value in the momory address specified by Rm+Rn to Rt
+*/
+void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
+  // Ensure register is valid (not SP, LR, or PC)
+  if (Rt >= 13) {
+      printf("Invalid register for LDRSB\n");
+      return;
+  }
+
+  // Compute memory address
+  uint32_t addr = cpu->R[Rm] + cpu->R[Rn];
+
+  // Check for memory boundry
+  if (!check_memory_bounds(addr, BYTE_SIZE)) {
+    printf("Memory access out of bounds at 0x%08X\n", addr);
+    return;
+  }
+
+
+  // Load signed 8-bit and sign-extend to 32-bit
+  cpu->R[Rt] = (int32_t)((int8_t)Memory[addr]);
 }
 
 
@@ -181,19 +348,19 @@ void print_memory(){
 
 // Example: Set flags based on a computation result
 void update_flags(CortexM0_CPU *cpu, uint32_t result, _Bool carry, _Bool overflow) {
-  // Clear previous flags  
+  // Clear previous flags
   cpu->APSR.all = 0;
-  
-  // Negative 
+
+  // Negative
   if ((result & (0x80000000))){
     cpu->APSR.Bits.APSR_N = 1;
     printf("a negative result \n");
   }
-  // Zero 
+  // Zero
   if (result == 0){
     cpu->APSR.Bits.APSR_Z = 1;
     printf("a zero result \n");
-  };  
+  };
   // Carry
   if (carry){
     cpu->APSR.Bits.APSR_C = 1;
@@ -214,22 +381,26 @@ int main() {
     printf("CPU init: \n");
     print_cpu_state(&cpu);
 
-    
+
     // cpu.R[0] = 0x7;  // Load a negative number
     // update_flags(&cpu, cpu.R[0], 0, 0);
     // printf("cpu status after operation: \n");
-    
-    cpu.R[1] = 0x453B;
+
+    cpu.R[1] = 0x4000003C;
     cpu.R[2] = 0x10;
     cpu.R[3] = 0X0;
-    STR(&cpu, 1, 2, 3);
+    STRB(&cpu, 1, 2, 3);
 
 
-    Memory[20] = 0x3C;
-    Memory[21] = 0xFD;
+    // Memory[20] = 0x3C;
+    // Memory[21] = 0xFD;
+    // Memory[22] = 0xAA;
+    // Memory[23] = 0xBB;
 
-    cpu.R[2] = 0x14;
-    LDR(&cpu, 4, 2, 3);
+    // cpu.R[2] = 0x14;
+    // LDR(&cpu, 4, 2, 3);
+    // LDRH(&cpu, 5, 2, 3);
+
     print_cpu_state(&cpu);
     print_memory();
 
