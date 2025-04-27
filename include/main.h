@@ -51,3 +51,6 @@ void LDRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 void LDRSH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 void LDRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
+void B(CortexM0_CPU *cpu, int32_t signed_immediate);
+static _Bool check_memory_bounds(uint32_t address, uint32_t size);
+void print_memory();

@@ -322,6 +322,14 @@ void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
 }
 
 
+/* 
+Branch instruction (B) 
+*/
+void B(CortexM0_CPU *cpu, int32_t signed_immediate) {
+  printf("Branching by offset: %d\n", signed_immediate);
+  cpu->R[15] += signed_immediate;
+}
+
 // Print CPU state (for debugging)
 void print_cpu_state(CortexM0_CPU *cpu) {
     printf("Registers:\n");
