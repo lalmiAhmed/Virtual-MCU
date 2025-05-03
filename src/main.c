@@ -330,6 +330,88 @@ void B(CortexM0_CPU *cpu, int32_t signed_immediate) {
   cpu->R[15] += signed_immediate;
 }
 
+/*
+Conditional branch instruction (Bcond)
+*/
+void Bcond(CortexM0_CPU *cpu, int32_t offset, Condition cond)
+{
+  switch (cond)
+  {
+  case EQ: // Equal (Z == 1)
+    if (!cpu->APSR.Bits.APSR_Z)
+      return;
+    break;
+
+  case NE: // Not Equal (Z == 0)
+    if (cpu->APSR.Bits.APSR_Z)
+      return;
+    break;
+
+  case CS: // Carry Set / Unsigned higher or same (C == 1)
+    if (!cpu->APSR.Bits.APSR_C)
+      return;
+    break;
+
+  case CC: // Carry Clear / Unsigned lower (C == 0)
+    if (cpu->APSR.Bits.APSR_C)
+      return;
+    break;
+
+  case MI: // Minus / Negative (N == 1)
+    if (!cpu->APSR.Bits.APSR_N)
+      return;
+    break;
+
+  case PL: // Plus / Positive or Zero (N == 0)
+    if (cpu->APSR.Bits.APSR_N)
+      return;
+    break;
+
+  case VS: // Overflow (V == 1)
+    if (!cpu->APSR.Bits.APSR_V)
+      return;
+    break;
+
+  case VC: // No Overflow (V == 0)
+    if (cpu->APSR.Bits.APSR_V)
+      return;
+    break;
+
+  case HI: // Unsigned higher (C == 1 && Z == 0)
+    if (!cpu->APSR.Bits.APSR_C || cpu->APSR.Bits.APSR_Z)
+      return;
+    break;
+
+  case LS: // Unsigned lower or same (C == 0 || Z == 1)
+    if (cpu->APSR.Bits.APSR_C && !cpu->APSR.Bits.APSR_Z)
+      return;
+    break;
+
+  case GE: // Signed greater than or equal (N == V)
+    if (cpu->APSR.Bits.APSR_N != cpu->APSR.Bits.APSR_V)
+      return;
+    break;
+
+  case LT: // Signed less than (N != V)
+    if (cpu->APSR.Bits.APSR_N == cpu->APSR.Bits.APSR_V)
+      return;
+    break;
+
+  case GT: // Signed greater than (Z == 0 && N == V)
+    if (cpu->APSR.Bits.APSR_Z || (cpu->APSR.Bits.APSR_N != cpu->APSR.Bits.APSR_V))
+      return;
+    break;
+
+  case LE: // Signed less than or equal (Z == 1 || N != V)
+    if (!cpu->APSR.Bits.APSR_Z && (cpu->APSR.Bits.APSR_N == cpu->APSR.Bits.APSR_V))
+      return;
+    break;
+  }
+
+  // Branch taken if condition passed
+  B(cpu, offset);
+}
+
 // Print CPU state (for debugging)
 void print_cpu_state(CortexM0_CPU *cpu) {
     printf("Registers:\n");

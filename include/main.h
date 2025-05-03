@@ -31,10 +31,17 @@ typedef struct {
 } CortexM0_CPU;
 
 
+typedef enum {
+  EQ, NE, CS, CC, MI, PL, VS, VC,
+  HI, LS, GE, LT, GT, LE
+} Condition;
+
 uint8_t Memory[MEMORY_SIZE];
 
 void init_cpu(CortexM0_CPU *cpu);
 void print_cpu_state(CortexM0_CPU *cpu);
+static _Bool check_memory_bounds(uint32_t address, uint32_t size);
+void print_memory();
 void update_flags(CortexM0_CPU *cpu, uint32_t result, _Bool carry, _Bool overflow);
 void ADD(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm);
 void SUB(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm);
@@ -52,5 +59,8 @@ void LDRSH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 void LDRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 void B(CortexM0_CPU *cpu, int32_t signed_immediate);
-static _Bool check_memory_bounds(uint32_t address, uint32_t size);
-void print_memory();
+void Bcond(CortexM0_CPU *cpu, int32_t offset, Condition cond);
+// BL
+// BX
+// BLX
+
