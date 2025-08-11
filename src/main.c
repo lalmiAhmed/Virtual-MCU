@@ -8,7 +8,16 @@ static _Bool check_memory_bounds(uint32_t address, uint32_t size);
 
 
 
-// Initialize CPU state
+
+/**
+ * @brief Initializes the Cortex-M0 CPU structure.
+ *
+ * This function sets up the initial state of the provided CortexM0_CPU structure,
+ * preparing it for use in the virtual MCU environment. It typically initializes
+ * registers, memory pointers, and any other necessary CPU state.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure to initialize.
+ */
 void init_cpu(CortexM0_CPU *cpu) {
     for (int i = 0; i < 16; i++) {
         cpu->R[i] = 0;  // Clear all registers
@@ -16,7 +25,17 @@ void init_cpu(CortexM0_CPU *cpu) {
     cpu->APSR.all = 0;      // Clear flags
 }
 
-// ADD Instruction
+/**
+ * @brief Performs the ADD operation for the CortexM0 CPU.
+ *
+ * This function adds the values of registers Rn and Rm, and stores the result in register Rd.
+ * It also updates the relevant CPU flags as per the ARM Cortex-M0 architecture specification.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rd  Destination register index where the result will be stored.
+ * @param Rn  First operand register index.
+ * @param Rm  Second operand register index.
+ */
 void ADD(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm) {
   uint32_t op1 = cpu->R[Rn];
   uint32_t op2 = cpu->R[Rm];
@@ -32,7 +51,19 @@ void ADD(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm) {
   update_flags(cpu, result, carry, overflow);
 }
 
-// SUB Instruction
+
+/**
+ * @brief Performs the SUB (subtract) operation on the CortexM0 CPU registers.
+ *
+ * This function subtracts the value in register Rm from the value in register Rn,
+ * and stores the result in register Rd. It also updates the relevant CPU flags
+ * according to the result of the subtraction, following the ARM Cortex-M0 instruction set.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rd  Destination register index where the result will be stored.
+ * @param Rn  First operand register index (minuend).
+ * @param Rm  Second operand register index (subtrahend).
+ */
 void SUB(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm) {
   uint32_t op1 = cpu->R[Rn];
   uint32_t op2 = cpu->R[Rm];
@@ -46,7 +77,18 @@ void SUB(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rn, uint8_t Rm) {
   update_flags(cpu, result, carry, overflow);
 }
 
-// CMP Instruction (Compare: Rn - Rm)
+/**
+ * @brief Compares the values of two CPU registers and updates condition flags.
+ *
+ * This function performs a comparison between the values stored in registers Rn and Rm
+ * of the provided CortexM0_CPU structure. The result of the comparison is not stored,
+ * but the CPU's condition flags (such as Zero, Negative, Carry, and Overflow) are updated
+ * to reflect the outcome of the subtraction (Rn - Rm).
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rn Index of the first register to compare.
+ * @param Rm Index of the second register to compare.
+ */
 void CMP(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm) {
   uint32_t op1 = cpu->R[Rn];
   uint32_t op2 = cpu->R[Rm];
@@ -58,7 +100,17 @@ void CMP(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm) {
   update_flags(cpu, result, carry, overflow);
 }
 
-// Logical AND
+/**
+ * @brief Performs a bitwise AND operation between two registers and stores the result.
+ *
+ * This function takes the values from registers Rn and Rm, performs a bitwise AND operation,
+ * and stores the result in register Rd within the provided CortexM0_CPU structure.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rn Index of the first source register.
+ * @param Rm Index of the second source register.
+ * @param Rd Index of the destination register where the result will be stored.
+ */
 void AND(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd){
   uint32_t op1 = cpu->R[Rn];
   uint32_t op2 = cpu->R[Rm];
@@ -69,7 +121,16 @@ void AND(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd){
   update_flags(cpu, result, carry, overflow);
 }
 
-// Logical OR
+/**
+ * @brief Performs a bitwise OR operation between two registers and stores the result in a destination register.
+ *
+ * This function simulates the ORR (bitwise OR) instruction for a Cortex-M0 CPU.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rn Index of the first source register.
+ * @param Rm Index of the second source register.
+ * @param Rd Index of the destination register where the result will be stored.
+ */
 void ORR(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd){
   uint32_t op1 = cpu->R[Rn];
   uint32_t op2 = cpu->R[Rm];
@@ -80,7 +141,16 @@ void ORR(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd){
   update_flags(cpu, result, carry, overflow);
 }
 
-// Logical exclusive OR
+/**
+ * @brief Performs a bitwise exclusive OR operation between two registers and stores the result in a destination register.
+ *
+ * This function simulates the EOR (exclusive OR) instruction for a Cortex-M0 CPU.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rn Index of the first source register.
+ * @param Rm Index of the second source register.
+ * @param Rd Index of the destination register where the result will be stored.
+ */
 void EOR(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd){
   uint32_t op1 = cpu->R[Rn];
   uint32_t op2 = cpu->R[Rm];
@@ -91,7 +161,16 @@ void EOR(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm, uint8_t Rd){
   update_flags(cpu, result, carry, overflow);
 }
 
-// Logical TST
+/**
+ * @brief Performs a bitwise test operation between two registers.
+ *
+ * This function performs a bitwise AND operation between the values in registers Rn and Rm,
+ * but does not store the result. Instead, it updates the CPU flags based on the result of the operation.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rn Index of the first source register.
+ * @param Rm Index of the second source register.
+ */
 void TST(CortexM0_CPU *cpu, uint8_t Rn, uint8_t Rm){
   uint32_t op1 = cpu->R[Rn];
   uint32_t op2 = cpu->R[Rm];
@@ -106,9 +185,19 @@ static _Bool check_memory_bounds(uint32_t address, uint32_t size) {
   return (address + size - 1 < MEMORY_SIZE);
 }
 
-/*
-Store the value in Rt to the momory address specified by Rm+Rn
-*/
+
+/**
+ * @brief Stores the value of a register into memory.
+ *
+ * This function emulates the STR (Store Register) instruction for a Cortex-M0 CPU.
+ * It stores the value from register Rt into the memory address computed by adding
+ * the values of registers Rn and Rm.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rt  Index of the source register whose value will be stored.
+ * @param Rn  Index of the base register used for address calculation.
+ * @param Rm  Index of the offset register used for address calculation.
+ */
 void STR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   // Ensure register is valid (not SP, LR, or PC)
   if (Rt >= 13) {
@@ -139,9 +228,19 @@ void STR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
 }
 
 
-/*
-Store the half word 16-bit value in Rt to the momory address specified by Rm+Rn
-*/
+
+/**
+ * @brief Stores the halfword from register Rt into memory.
+ *
+ * This function implements the STRH (Store Register Halfword) instruction for the Cortex-M0 CPU.
+ * It stores the lower 16 bits of the value in register Rt into the memory address computed by adding
+ * the values of registers Rn and Rm.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rt  Index of the source register whose halfword value will be stored.
+ * @param Rn  Index of the base register used for address calculation.
+ * @param Rm  Index of the offset register used for address calculation.
+ */
 void STRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   if (Rt >= 13) {
       printf("Invalid register for STRH\n");
@@ -167,9 +266,19 @@ void STRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   Memory[addr + 1] = (uint8_t)(halfword >> 8);
 }
 
-/*
-Store 8-bit value in Rt to the momory address specified by Rm+Rn
-*/
+
+/**
+ * @brief Store Byte (STRB) instruction implementation for Cortex-M0 CPU emulator.
+ *
+ * This function emulates the STRB instruction, which stores the least significant byte
+ * from register Rt into the memory address computed by adding the values of registers
+ * Rn and Rm.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rt  Index of the source register whose least significant byte will be stored.
+ * @param Rn  Index of the base register used for address calculation.
+ * @param Rm  Index of the register whose value is added to Rn for address calculation.
+ */
 void STRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   if (Rt >= 13) {
       printf("Invalid register for STRB\n");
@@ -188,9 +297,18 @@ void STRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
 }
 
 
-/*
-Load the value in the momory address specified by Rm+Rn to Rt
-*/
+/**
+ * @brief Loads a value from memory into a register.
+ *
+ * This function emulates the LDR (Load Register) instruction for a Cortex-M0 CPU.
+ * It loads a value from the memory address computed using the values of registers Rn and Rm,
+ * and stores the result into register Rt.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rt  Destination register index where the loaded value will be stored.
+ * @param Rn  Base register index used to compute the memory address.
+ * @param Rm  Offset register index used to compute the memory address.
+ */
 void LDR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   // Ensure register is valid (not SP, LR, or PC)
   if (Rt >= 13) {
@@ -221,9 +339,18 @@ void LDR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
 
 }
 
-/*
-Load the 16-bit unsigned halfword value in the momory address specified by Rm+Rn to Rt
-*/
+
+/**
+ * @brief Executes the LDRH (Load Register Halfword) instruction for the Cortex-M0 CPU.
+ *
+ * This function loads a 16-bit halfword from memory into the specified register (Rt).
+ * The memory address is calculated using the base register (Rn) and an offset (Rm).
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rt  Destination register index where the loaded halfword will be stored.
+ * @param Rn  Base register index used to calculate the memory address.
+ * @param Rm  Offset register index used to calculate the memory address.
+ */
 void LDRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   // Ensure register is valid (not SP, LR, or PC)
   if (Rt >= 13) {
@@ -251,10 +378,19 @@ void LDRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
                  (Memory[addr + 1] << 8);
 }
 
-/*
-Load the 16-bit signed halfword value in the momory address specified by Rm+Rn to Rt
-*/
 
+/**
+ * @brief Executes the LDRSH (Load Register Signed Halfword) instruction for the Cortex-M0 CPU.
+ *
+ * This function loads a 16-bit halfword from memory, sign-extends it to 32 bits,
+ * and stores the result in the destination register Rt. The address from which the
+ * halfword is loaded is calculated using the base register Rn and the offset register Rm.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rt  Destination register index where the loaded value will be stored.
+ * @param Rn  Base register index used to calculate the memory address.
+ * @param Rm  Offset register index used to calculate the memory address.
+ */
 void LDRSH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   if (Rt >= 13) {
       printf("Invalid register for LDRSH\n");
@@ -274,9 +410,18 @@ void LDRSH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   cpu->R[Rt] = (int32_t)halfword;  // Sign-extend to 32-bit
 }
 
-/*
-Load the 8-bit unsigned value in the momory address specified by Rm+Rn to Rt
-*/
+
+/**
+ * @brief Executes the LDRB (Load Register Byte) instruction for the Cortex-M0 CPU emulator.
+ *
+ * This function loads a byte from memory, addressed by the sum of registers Rn and Rm,
+ * and stores the result into register Rt. The loaded byte is zero-extended to 32 bits.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rt  Destination register index where the loaded byte will be stored.
+ * @param Rn  Base register index used for memory address calculation.
+ * @param Rm  Offset register index added to the base register for address calculation.
+ */
 void LDRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   // Ensure register is valid (not SP, LR, or PC)
   if (Rt >= 13) {
@@ -297,9 +442,18 @@ void LDRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   cpu->R[Rt] = (uint8_t)Memory[addr];
 }
 
-/*
-Load the 8-bit signed value in the momory address specified by Rm+Rn to Rt
-*/
+
+/**
+ * @brief Executes the LDRSB (Load Register Signed Byte) instruction for the Cortex-M0 CPU.
+ *
+ * This function loads a signed byte from memory, sign-extends it to 32 bits, and stores the result in the destination register (Rt).
+ * The memory address is calculated using the base register (Rn) and the offset register (Rm).
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rt  Destination register index where the loaded value will be stored.
+ * @param Rn  Base register index used to calculate the memory address.
+ * @param Rm  Offset register index used to calculate the memory address.
+ */
 void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   // Ensure register is valid (not SP, LR, or PC)
   if (Rt >= 13) {
@@ -322,17 +476,31 @@ void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
 }
 
 
-/* 
-Branch instruction (B) 
-*/
+/**
+ * @brief Branches to a specified offset from the current instruction address.
+ *
+ * This function simulates the B (Branch) instruction for a Cortex-M0 CPU.
+ * It updates the program counter (R15) by adding the given signed immediate offset.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param signed_immediate The signed offset to branch to.
+ */
 void B(CortexM0_CPU *cpu, int32_t signed_immediate) {
   printf("Branching by offset: %d\n", signed_immediate);
   cpu->R[15] += signed_immediate;
 }
 
-/*
-Conditional branch instruction (Bcond)
-*/
+
+/**
+ * @brief Executes a conditional branch instruction.
+ *
+ * This function performs a branch operation based on the specified condition.
+ * If the condition is met, the program counter (PC) is updated by the given offset.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param offset The signed offset to add to the PC if the condition is true.
+ * @param cond The condition code that determines whether the branch is taken.
+ */
 void Bcond(CortexM0_CPU *cpu, int32_t offset, Condition cond)
 {
   switch (cond)
@@ -412,31 +580,18 @@ void Bcond(CortexM0_CPU *cpu, int32_t offset, Condition cond)
   B(cpu, offset);
 }
 
-// Print CPU state (for debugging)
-void print_cpu_state(CortexM0_CPU *cpu) {
-    printf("Registers:\n");
-    for (int i = 0; i < 16; i++) {
-        printf("R%d: 0x%08X\n", i, cpu->R[i]);
-    }
-    printf("APSR: N=%d Z=%d C=%d V=%d\n",
-        cpu->APSR.Bits.APSR_N,
-        cpu->APSR.Bits.APSR_Z,
-        cpu->APSR.Bits.APSR_C,
-        cpu->APSR.Bits.APSR_V);
-}
 
-// Print Memory
-void print_memory(){
-  for(int i = 0; i < MEMORY_SIZE; i++){
-    printf("[%d] 0x%02X ",i, Memory[i]);
-    if(i % 8 == 0) {
-      printf("\n");
-    }
-  }
-  printf("\n");
-}
-
-// Example: Set flags based on a computation result
+/**
+ * @brief Updates the CPU flags based on the result of an operation.
+ *
+ * This function updates the Negative, Zero, Carry, and Overflow flags in the APSR
+ * based on the result of an arithmetic operation.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param result The result of the operation to evaluate flags for.
+ * @param carry Indicates if there was a carry from the operation.
+ * @param overflow Indicates if there was an overflow from the operation.
+ */
 void update_flags(CortexM0_CPU *cpu, uint32_t result, _Bool carry, _Bool overflow) {
   // Clear previous flags
   cpu->APSR.all = 0;
@@ -462,6 +617,50 @@ void update_flags(CortexM0_CPU *cpu, uint32_t result, _Bool carry, _Bool overflo
     printf("an overflowed result \n");
   }
 }
+
+/********************************************************************
+/************************ Debug functions ***************************
+*********************************************************************/
+
+
+/**
+ * @brief Prints the current state of the Cortex-M0 CPU.
+ *
+ * This function outputs the values of the CPU registers and other relevant
+ * state information for debugging or inspection purposes.
+ *
+ * @param cpu Pointer to a CortexM0_CPU structure representing the CPU whose state is to be printed.
+ */
+void print_cpu_state(CortexM0_CPU *cpu) {
+    printf("Registers:\n");
+    for (int i = 0; i < 16; i++) {
+        printf("R%d: 0x%08X\n", i, cpu->R[i]);
+    }
+    printf("APSR: N=%d Z=%d C=%d V=%d\n",
+        cpu->APSR.Bits.APSR_N,
+        cpu->APSR.Bits.APSR_Z,
+        cpu->APSR.Bits.APSR_C,
+        cpu->APSR.Bits.APSR_V);
+}
+
+/**
+ * @brief Prints the contents of the memory array.
+ *
+ * This function iterates through the global Memory array and prints its contents
+ * in a formatted manner, displaying each byte in hexadecimal format.
+ */
+void print_memory(){
+  for(int i = 0; i < MEMORY_SIZE; i++){
+    printf("[%d] 0x%02X ",i, Memory[i]);
+    if(i % 8 == 0) {
+      printf("\n");
+    }
+  }
+  printf("\n");
+}
+
+
+
 
 
 

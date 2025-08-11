@@ -34,7 +34,7 @@ typedef struct {
 typedef enum {
   EQ, NE, CS, CC, MI, PL, VS, VC,
   HI, LS, GE, LT, GT, LE
-} Condition;
+} Condition; 
 
 uint8_t Memory[MEMORY_SIZE];
 
