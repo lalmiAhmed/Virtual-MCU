@@ -2,6 +2,7 @@
 
 #include "memory_file.h"
 
+uint8_t Memory[MEMORY_SIZE];
 
 _Bool check_memory_bounds(uint32_t address, uint32_t size) {
   return (address + size - 1 < MEMORY_SIZE);

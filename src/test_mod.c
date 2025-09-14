@@ -1,4 +1,4 @@
-#include "Bcond_test.h"
+#include "test_mod.h"
 
 void test_Bcond_EQ(CortexM0_CPU *cpu) {
     uint32_t L_offset = 4;
