@@ -28,6 +28,9 @@ void LDRSH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 void LDRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 
+void PUSH(CortexM0_CPU *cpu, uint8_t Rm);
+void POP(CortexM0_CPU *cpu, uint8_t Rm);
+
 
 
 #endif // MEMORY_FILE_H

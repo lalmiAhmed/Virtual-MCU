@@ -105,3 +105,30 @@ void Bcond(CortexM0_CPU *cpu, int32_t offset, Condition cond)
   B(cpu, offset);
 }
 
+
+void BLX(CortexM0_CPU *cpu, uint8_t Rm, uint8_t inst_size)
+{
+  assert((inst_size == 2) || (inst_size == 4));
+
+  cpu->R[14] = cpu->R[15]+ inst_size; 
+  uint32_t target = cpu->R[Rm];
+
+  // Check Thumb bit (bit0 must be 1)
+  assert((target & 0x1) == 1);
+
+  // Force PC = target with bit0 cleared
+  cpu->R[15] = target & ~1U;
+}
+
+
+void BX(CortexM0_CPU *cpu, uint8_t Rm)
+{
+    uint32_t target = cpu->R[Rm];
+
+    // Thumb bit must be set
+    assert((target & 0x1) == 1);
+
+    // Update PC with bit0 cleared
+    cpu->R[15] = target & ~1U;
+}
+
