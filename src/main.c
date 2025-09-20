@@ -15,10 +15,17 @@ int main() {
     // printf("CPU init: \n");
     // print_cpu_state(&cpu);
 
-    test_Bcond_EQ(&cpu);
+    // test_Bcond_EQ(&cpu);
+    cpu.R[1] = 0x12;
 
+    // uint32_t *tmp_sp = cpu.SP;
+    printf("Stack ends at :%p\n", (uint32_t *)&(Stack[Stack_size-1]));
+    
+
+    PUSH(&cpu, 1);
     print_cpu_state(&cpu);
-    print_memory();
+    // print_memory();
+    print_stack();
 
     return 0;
 }

@@ -11,7 +11,7 @@ void test_Bcond_EQ(CortexM0_CPU *cpu) {
     // assert(*pc_reg == L_offset);
 
     init_cpu(cpu);
-    cpu->APSR.Bits.APSR_Z = 0;  // Zero flag clear
+    cpu->APSR.Bits.APSR_Z = 1;  // Zero flag clear
     Bcond(cpu, L_offset, EQ);
     assert(*pc_reg == L_offset);
 }

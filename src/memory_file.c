@@ -24,6 +24,16 @@ void print_memory(){
   printf("\n");
 }
 
+void print_stack(){
+  for(int i = 0; i < Stack_size; i++){
+    printf("[%d] 0x%02X ",i, Stack[i]);
+    if(i % 8 == 0) {
+      printf("\n");
+    }
+  }
+  printf("\n");
+}
+
 /**
  * @brief Stores the value of a register into memory.
  *
@@ -310,4 +320,17 @@ void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
 
   // Load signed 8-bit and sign-extend to 32-bit
   cpu->R[Rt] = (int32_t)((int8_t)Memory[addr]);
+}
+
+void PUSH(CortexM0_CPU *cpu, uint8_t Rm)
+{
+  
+  cpu->SP -= 4;
+
+  // Store the 32-bit register value in stack
+  Stack[cpu->SP + 1] = cpu->R[Rm] & 0xFF;
+  Stack[cpu->SP + 2] = (cpu->R[Rm] >> 8) & 0xFF;
+  Stack[cpu->SP + 3] = (cpu->R[Rm] >> 16) & 0xFF;
+  Stack[cpu->SP + 4] = (cpu->R[Rm] >> 24) & 0xFF;
+  
 }

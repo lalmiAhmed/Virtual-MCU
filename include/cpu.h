@@ -5,6 +5,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#define SP R[13]
+#define LR R[14]
+#define PC R[15]
+
 typedef enum {
   EQ, NE, CS, CC, MI, PL, VS, VC,
   HI, LS, GE, LT, GT, LE
