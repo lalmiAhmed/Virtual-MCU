@@ -6,11 +6,12 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <assert.h>
 #include "cpu.h"
 
 
 #define MEMORY_SIZE 56 // to be changed to 5KB
-#define Stack_size 10 // to be changed to 1KB
+#define Stack_size 12 // to be changed to 1KB
 #define WORD_SIZE 4
 #define HALFWORD_SIZE 2
 #define BYTE_SIZE 1

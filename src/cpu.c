@@ -16,7 +16,7 @@ void init_cpu(CortexM0_CPU *cpu) {
     for (int i = 0; i < 16; i++) {
         cpu->R[i] = 0;  // Clear all registers
     }
-    cpu->SP = Stack_size -1;
+    cpu->SP = Stack_size - 4;
     cpu->APSR.all = 0;      // Clear flags
 }
 

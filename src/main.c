@@ -19,13 +19,20 @@ int main() {
     cpu.R[1] = 0x12;
 
     // uint32_t *tmp_sp = cpu.SP;
-    printf("Stack ends at :%p\n", (uint32_t *)&(Stack[Stack_size-1]));
+    // printf("Stack ends at :%p\n", (uint32_t *)&(Stack[Stack_size-1]));
+    print_cpu_state(&cpu);
     
 
     PUSH(&cpu, 1);
     print_cpu_state(&cpu);
     // print_memory();
     print_stack();
+
+    printf("Poping back the value to R2 \n");
+    POP(&cpu, 2);
+    print_cpu_state(&cpu);
+    print_stack();
+
 
     return 0;
 }

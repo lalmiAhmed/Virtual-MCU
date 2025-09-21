@@ -326,11 +326,26 @@ void PUSH(CortexM0_CPU *cpu, uint8_t Rm)
 {
   
   cpu->SP -= 4;
-
+  assert((cpu->SP & 0x3) == 0); // word alignment
+  assert(cpu->SP <= Stack_size - 4);
   // Store the 32-bit register value in stack
-  Stack[cpu->SP + 1] = cpu->R[Rm] & 0xFF;
-  Stack[cpu->SP + 2] = (cpu->R[Rm] >> 8) & 0xFF;
-  Stack[cpu->SP + 3] = (cpu->R[Rm] >> 16) & 0xFF;
-  Stack[cpu->SP + 4] = (cpu->R[Rm] >> 24) & 0xFF;
+  Stack[cpu->SP ] = cpu->R[Rm] & 0xFF;
+  Stack[cpu->SP + 1] = (cpu->R[Rm] >> 8) & 0xFF;
+  Stack[cpu->SP + 2] = (cpu->R[Rm] >> 16) & 0xFF;
+  Stack[cpu->SP + 3] = (cpu->R[Rm] >> 24) & 0xFF;
   
+}
+
+void POP(CortexM0_CPU *cpu, uint8_t Rm)
+{
+  
+  cpu->SP += 4;
+  assert((cpu->SP & 0x3) == 0); // word alignment
+  assert(cpu->SP <= Stack_size - 4);
+
+  // Load 32-bit value from the stack into the target register
+  cpu->R[Rm] = Stack[cpu->SP - 4] & 0xFF;
+  cpu->R[Rm] |= (Stack[cpu->SP - 3] & 0xFF) << 8;
+  cpu->R[Rm] |= (Stack[cpu->SP - 2] & 0xFF) << 16;
+  cpu->R[Rm] |= (Stack[cpu->SP - 1] & 0xFF) << 24;
 }
