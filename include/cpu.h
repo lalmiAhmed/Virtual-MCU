@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include "exception.h"
 
 #define SP R[13]
 #define LR R[14]

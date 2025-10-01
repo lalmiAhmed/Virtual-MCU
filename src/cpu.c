@@ -88,3 +88,39 @@ void print_cpu_state(CortexM0_CPU *cpu) {
         cpu->APSR.Bits.APSR_C,
         cpu->APSR.Bits.APSR_V);
 }
+
+
+void cpu_reset(CortexM0_CPU *cpu){
+  cpu->SP = vector_table[0]; // initilize stack pointer
+  cpu->PC = vector_table[1] & ~1;  // Reset handler (bit0=0 for Thumb)
+  cpu->APSR.all = 0;
+}
+
+
+void exception_entry(CortexM0_CPU *cpu, uint8_t exception_number) {
+    // Push registers (simplified)
+    PUsh(cpu, cpu->APSR.all);
+    PUsh(cpu, cpu->PC);
+    PUsh(cpu, cpu->LR);
+    PUsh(cpu, cpu->R[12]);
+    PUsh(cpu, cpu->R[3]);
+    PUsh(cpu, cpu->R[2]);
+    PUsh(cpu, cpu->R[1]);
+    PUsh(cpu, cpu->R[0]);
+
+    // cpu->LR = 0xFFFFFFF9; // Return to Thread mode using MSP
+    cpu->PC = vector_table[exception_number] & ~1; // Jump to handler
+}
+
+void exception_return(CortexM0_CPU *cpu) {
+  cpu->R[0] = POP(cpu);
+  cpu->R[1] = POP(cpu);
+  cpu->R[2] = POP(cpu);
+  cpu->R[3] = POP(cpu);
+  cpu->R[12] = POP(cpu);
+  cpu->LR = POP(cpu);
+  cpu->PC = POP(cpu);
+  cpu->APSR.all = POP(cpu);
+}
+
+

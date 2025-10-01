@@ -32,8 +32,8 @@ void LDRSH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 void LDRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 
-void PUSH(CortexM0_CPU *cpu, uint8_t Rm);
-void POP(CortexM0_CPU *cpu, uint8_t Rm);
+void PUSH(CortexM0_CPU *cpu, uint32_t value);
+uint32_t POP(CortexM0_CPU *cpu);
 
 
 

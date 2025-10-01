@@ -322,21 +322,21 @@ void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
   cpu->R[Rt] = (int32_t)((int8_t)Memory[addr]);
 }
 
-void PUSH(CortexM0_CPU *cpu, uint8_t Rm)
+void PUSH(CortexM0_CPU *cpu, uint32_t value)
 {
   
   cpu->SP -= 4;
   assert((cpu->SP & 0x3) == 0); // word alignment
   assert(cpu->SP <= Stack_size - 4);
   // Store the 32-bit register value in stack
-  Stack[cpu->SP ] = cpu->R[Rm] & 0xFF;
-  Stack[cpu->SP + 1] = (cpu->R[Rm] >> 8) & 0xFF;
-  Stack[cpu->SP + 2] = (cpu->R[Rm] >> 16) & 0xFF;
-  Stack[cpu->SP + 3] = (cpu->R[Rm] >> 24) & 0xFF;
+  Stack[cpu->SP ] = value & 0xFF;
+  Stack[cpu->SP + 1] = (value >> 8) & 0xFF;
+  Stack[cpu->SP + 2] = (value >> 16) & 0xFF;
+  Stack[cpu->SP + 3] = (value >> 24) & 0xFF;
   
 }
 
-void POP(CortexM0_CPU *cpu, uint8_t Rm)
+uint32_t POP(CortexM0_CPU *cpu)
 {
   
   cpu->SP += 4;
@@ -344,8 +344,10 @@ void POP(CortexM0_CPU *cpu, uint8_t Rm)
   assert(cpu->SP <= Stack_size - 4);
 
   // Load 32-bit value from the stack into the target register
-  cpu->R[Rm] = Stack[cpu->SP - 4] & 0xFF;
-  cpu->R[Rm] |= (Stack[cpu->SP - 3] & 0xFF) << 8;
-  cpu->R[Rm] |= (Stack[cpu->SP - 2] & 0xFF) << 16;
-  cpu->R[Rm] |= (Stack[cpu->SP - 1] & 0xFF) << 24;
+  uint32_t value = 0; 
+  value = Stack[cpu->SP - 4] & 0xFF;
+  value |= (Stack[cpu->SP - 3] & 0xFF) << 8;
+  value |= (Stack[cpu->SP - 2] & 0xFF) << 16;
+  value |= (Stack[cpu->SP - 1] & 0xFF) << 24;
+  return value;
 }
