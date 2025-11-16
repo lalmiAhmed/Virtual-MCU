@@ -16,7 +16,8 @@ int main() {
     // print_cpu_state(&cpu);
 
     // test_Bcond_EQ(&cpu);
-    cpu.R[1] = 0x12;
+    MOVS(&cpu, 8, 0x12);
+    
 
     // uint32_t *tmp_sp = cpu.SP;
     // printf("Stack ends at :%p\n", (uint32_t *)&(Stack[Stack_size-1]));
@@ -29,9 +30,11 @@ int main() {
     print_stack();
 
     printf("Poping back the value to R2 \n");
-    POP(&cpu, 2);
+    cpu.R[2] = POP(&cpu);
+    STR(&cpu, 2, 15, 0);
     print_cpu_state(&cpu);
     print_stack();
+    print_memory();
 
 
     return 0;

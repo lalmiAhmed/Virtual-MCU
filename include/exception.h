@@ -2,7 +2,8 @@
 #define EXCEPTION_H
 #include <stdint.h>
 
-uint32_t vector_table[48];
+#define VECTOR_TABLE_SIZE 48
+extern uint32_t vector_table[];
 
 
 void load_vector_table(uint32_t *memory);

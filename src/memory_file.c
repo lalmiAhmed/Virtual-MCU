@@ -338,16 +338,30 @@ void PUSH(CortexM0_CPU *cpu, uint32_t value)
 
 uint32_t POP(CortexM0_CPU *cpu)
 {
-  
-  cpu->SP += 4;
   assert((cpu->SP & 0x3) == 0); // word alignment
   assert(cpu->SP <= Stack_size - 4);
-
   // Load 32-bit value from the stack into the target register
   uint32_t value = 0; 
-  value = Stack[cpu->SP - 4] & 0xFF;
-  value |= (Stack[cpu->SP - 3] & 0xFF) << 8;
-  value |= (Stack[cpu->SP - 2] & 0xFF) << 16;
-  value |= (Stack[cpu->SP - 1] & 0xFF) << 24;
+  value = Stack[cpu->SP] & 0xFF;
+  value |= (Stack[cpu->SP + 1] & 0xFF) << 8;
+  value |= (Stack[cpu->SP + 2] & 0xFF) << 16;
+  value |= (Stack[cpu->SP + 3] & 0xFF) << 24;
+
+  cpu->SP += 4;
   return value;
+}
+
+/**
+* @brief Move (immediate) writes an immediate value to the destination register. The condition flags are updated based on
+* the result.
+*/
+
+void MOVS(CortexM0_CPU *cpu, uint8_t Rd, uint8_t imm8){
+  assert(Rd <= 7 && "MOVS #imm8 only supports R0-R7");
+  
+  cpu->R[Rd] = imm8 & (0xFF);
+
+  update_flags(cpu, (uint32_t)(imm8 & (0xFF)), 0, 0);
+
+  return;
 }

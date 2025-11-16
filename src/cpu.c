@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include "memory_file.h"
+#include "exception.h"
 
 uint8_t Stack[Stack_size];
 
@@ -99,14 +100,14 @@ void cpu_reset(CortexM0_CPU *cpu){
 
 void exception_entry(CortexM0_CPU *cpu, uint8_t exception_number) {
     // Push registers (simplified)
-    PUsh(cpu, cpu->APSR.all);
-    PUsh(cpu, cpu->PC);
-    PUsh(cpu, cpu->LR);
-    PUsh(cpu, cpu->R[12]);
-    PUsh(cpu, cpu->R[3]);
-    PUsh(cpu, cpu->R[2]);
-    PUsh(cpu, cpu->R[1]);
-    PUsh(cpu, cpu->R[0]);
+    PUSH(cpu, cpu->APSR.all);
+    PUSH(cpu, cpu->PC);
+    PUSH(cpu, cpu->LR);
+    PUSH(cpu, cpu->R[12]);
+    PUSH(cpu, cpu->R[3]);
+    PUSH(cpu, cpu->R[2]);
+    PUSH(cpu, cpu->R[1]);
+    PUSH(cpu, cpu->R[0]);
 
     // cpu->LR = 0xFFFFFFF9; // Return to Thread mode using MSP
     cpu->PC = vector_table[exception_number] & ~1; // Jump to handler

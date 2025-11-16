@@ -31,9 +31,16 @@ void LDRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 void LDRSH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 void LDRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
 void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
-
 void PUSH(CortexM0_CPU *cpu, uint32_t value);
 uint32_t POP(CortexM0_CPU *cpu);
+
+
+
+void MOVS(CortexM0_CPU *cpu, uint8_t Rd, uint8_t imm8);
+
+/* Not Implemented Functions */
+void LSL(uint32_t *immediate);
+void LSR(uint32_t *immediate);
 
 
 
