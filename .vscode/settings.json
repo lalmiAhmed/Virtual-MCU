@@ -6,6 +6,7 @@
         "stdint.h": "c",
         "bcond_test.h": "c",
         "memory_file.h": "c",
-        "test_mod.h": "c"
+        "test_mod.h": "c",
+        "functional": "c"
     }
 }

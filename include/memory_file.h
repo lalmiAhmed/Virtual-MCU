@@ -37,10 +37,10 @@ uint32_t POP(CortexM0_CPU *cpu);
 
 
 void MOVS(CortexM0_CPU *cpu, uint8_t Rd, uint8_t imm8);
+void MOVS_REG(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm);
 
-/* Not Implemented Functions */
-void LSL(uint32_t *immediate);
-void LSR(uint32_t *immediate);
+void LSL(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm,uint32_t immediate);
+void LSR(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm,uint32_t immediate);
 
 
 

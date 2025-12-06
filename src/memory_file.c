@@ -365,3 +365,76 @@ void MOVS(CortexM0_CPU *cpu, uint8_t Rd, uint8_t imm8){
 
   return;
 }
+
+/**
+ * @brief Move (register) copies the value from the source register to the destination register. The condition flags are updated based on
+ * the result.
+ */
+void MOVS_REG(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm){
+  assert(Rd <= 7 && "MOVS_REG only supports R0-R7");
+  assert(Rm <= 7 && "MOVS_REG only supports R0-R7");  
+  cpu->R[Rd] = cpu->R[Rm];
+  update_flags(cpu, cpu->R[Rd], 0, 0);
+  return;
+
+}
+
+/**
+* @brief Logical Shift Left (immediate) shifts the value in the source register left by the specified immediate amount
+* and stores the result in the destination register. The condition flags are updated  based on the result.
+*/  
+
+void LSL(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm,uint32_t immediate){
+
+  assert(Rm < 13 && "LSL: Source only supports R0-R12");
+  assert(Rd < 13 && "LSL: Source only supports R0-R12");
+
+  uint32_t shift = immediate & 0x1F; // Only lower 5 bits are valid for shift amount
+  uint8_t carry_out = 0;
+  
+  if (shift == 0) {
+    // Shift of zero: carry does NOT change
+    carry_out = cpu->APSR.Bits.APSR_C;  // unchanged
+    cpu->R[Rd] = cpu->R[Rm];
+  }
+  else if (shift < 32) {
+    carry_out = (cpu->R[Rm] >> (32 - shift)) & 1;  // last bit shifted out
+    cpu->R[Rd] = (uint32_t)(cpu->R[Rm] << shift);
+  }
+  else { 
+    // Shift >= 32 → result = 0, carry = 0
+    carry_out = 0;
+    cpu->R[Rd] = 0;
+}
+
+  update_flags(cpu, cpu->R[Rd], carry_out, 0);
+  return;
+}
+
+
+/**
+* @brief Logical Shift Right (immediate) shifts the value in the source register right by the specified immediate amount
+* and stores the result in the destination register. The condition flags are updated  based on the result.
+*/  
+
+void LSR(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm,uint32_t immediate){
+
+  assert(Rm < 13 && "LSR: Source only supports R0-R12");
+  assert(Rd < 13 && "LSR: Source only supports R0-R12");
+
+  uint32_t shift = immediate & 0x1F; // Only lower 5 bits are valid for shift amount
+  uint8_t carry_out = 0;
+  
+  if (shift == 0) {
+    //  ARMv6-M semantics: LSR #0 means LSR #32
+    carry_out = (cpu->R[Rm] >> 31) & 1;  //  bit 31 becomes carry
+    cpu->R[Rd] = 0; // shifting 32 bits → result = 0
+  }
+  else{
+    carry_out = (cpu->R[Rm] >> (shift - 1)) & 1;  // last bit shifted out
+    cpu->R[Rd] = (uint32_t)(cpu->R[Rm] >> shift);
+  }
+
+  update_flags(cpu, cpu->R[Rd], carry_out, 0);
+  return;
+}
