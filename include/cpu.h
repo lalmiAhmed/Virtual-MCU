@@ -70,6 +70,7 @@ void LSL(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm,uint32_t immediate);
 void LSR(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm,uint32_t immediate);
 
 void raise_hardfault(CortexM0_CPU *cpu);
+void check_Rt_validity(uint8_t Rt, const char *instruction_name);
 
 
 #endif // CPU_H

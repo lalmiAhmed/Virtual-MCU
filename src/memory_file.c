@@ -3,8 +3,8 @@
 #include "memory_file.h"
 
 uint8_t Memory[MEMORY_SIZE];
-// uint8_t Flash[FLASH_SIZE];
-// uint8_t SRAM[SRAM_SIZE];
+uint8_t Flash[FLASH_SIZE];
+uint8_t SRAM[SRAM_SIZE];
 
 _Bool check_memory_bounds(uint32_t address, uint32_t size) {
   return (address + size - 1 < MEMORY_SIZE);
@@ -83,7 +83,7 @@ bool mem_write8(uint32_t addr, uint8_t  value){
 
 bool mem_write16(uint32_t addr, uint16_t value){
   if (addr + 1 >= MEMORY_SIZE) return false;
-  if (addr & 1) {
+  if (addr & 1) { // addr % 2 == 0
         // Unaligned halfword → HardFault (later)
         return false;
     }
@@ -95,7 +95,7 @@ bool mem_write16(uint32_t addr, uint16_t value){
 
 bool mem_write32(uint32_t addr, uint32_t value){
   if (addr + 3 >= MEMORY_SIZE) return false;
-  if (addr & 3) {
+  if (addr & 3) { // addr % 4 == 0
         // Unaligned halfword → HardFault (later)
         return false;
     }

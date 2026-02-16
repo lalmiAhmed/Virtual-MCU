@@ -13,12 +13,14 @@ uint8_t Stack[Stack_size];
  *
  * @param cpu Pointer to the CortexM0_CPU structure to initialize.
  */
-void init_cpu(CortexM0_CPU *cpu) {
-    for (int i = 0; i < 16; i++) {
-        cpu->R[i] = 0;  // Clear all registers
-    }
-    cpu->SP = Stack_size - 4;
-    cpu->APSR.all = 0;      // Clear flags
+void init_cpu(CortexM0_CPU *cpu)
+{
+  for (int i = 0; i < 16; i++)
+  {
+    cpu->R[i] = 0; // Clear all registers
+  }
+  cpu->SP = Stack_size - 4;
+  cpu->APSR.all = 0; // Clear flags
 }
 
 /**
@@ -29,8 +31,9 @@ void init_cpu(CortexM0_CPU *cpu) {
  *
  * @param cpu Pointer to the CortexM0_CPU structure to reset.
  */
-void reset_cpu(CortexM0_CPU *cpu) {
-    memset(cpu, 0, sizeof(CortexM0_CPU));
+void reset_cpu(CortexM0_CPU *cpu)
+{
+  memset(cpu, 0, sizeof(CortexM0_CPU));
 }
 
 /**
@@ -44,27 +47,32 @@ void reset_cpu(CortexM0_CPU *cpu) {
  * @param carry Indicates if there was a carry from the operation.
  * @param overflow Indicates if there was an overflow from the operation.
  */
-void update_flags(CortexM0_CPU *cpu, uint32_t result, _Bool carry, _Bool overflow) {
+void update_flags(CortexM0_CPU *cpu, uint32_t result, _Bool carry, _Bool overflow)
+{
   // Clear previous flags
   cpu->APSR.all = 0;
 
   // Negative
-  if ((result & (0x80000000))){
+  if ((result & (0x80000000)))
+  {
     cpu->APSR.Bits.APSR_N = 1;
     printf("a negative result \n");
   }
   // Zero
-  if (result == 0){
+  if (result == 0)
+  {
     cpu->APSR.Bits.APSR_Z = 1;
     printf("a zero result \n");
   };
   // Carry
-  if (carry){
+  if (carry)
+  {
     cpu->APSR.Bits.APSR_C = 1;
     printf("a carry result \n");
   }
   // Overflow
-  if (overflow){
+  if (overflow)
+  {
     cpu->APSR.Bits.APSR_V = 1;
     printf("an overflowed result \n");
   }
@@ -78,42 +86,45 @@ void update_flags(CortexM0_CPU *cpu, uint32_t result, _Bool carry, _Bool overflo
  *
  * @param cpu Pointer to a CortexM0_CPU structure representing the CPU whose state is to be printed.
  */
-void print_cpu_state(CortexM0_CPU *cpu) {
-    printf("Registers:\n");
-    for (int i = 0; i < 16; i++) {
-        printf("R%d: 0x%08X\n", i, cpu->R[i]);
-    }
-    printf("APSR: N=%d Z=%d C=%d V=%d\n",
-        cpu->APSR.Bits.APSR_N,
-        cpu->APSR.Bits.APSR_Z,
-        cpu->APSR.Bits.APSR_C,
-        cpu->APSR.Bits.APSR_V);
+void print_cpu_state(CortexM0_CPU *cpu)
+{
+  printf("Registers:\n");
+  for (int i = 0; i < 16; i++)
+  {
+    printf("R%d: 0x%08X\n", i, cpu->R[i]);
+  }
+  printf("APSR: N=%d Z=%d C=%d V=%d\n",
+         cpu->APSR.Bits.APSR_N,
+         cpu->APSR.Bits.APSR_Z,
+         cpu->APSR.Bits.APSR_C,
+         cpu->APSR.Bits.APSR_V);
 }
 
-
-void cpu_reset(CortexM0_CPU *cpu){
-  cpu->SP = vector_table[0]; // initilize stack pointer
-  cpu->PC = vector_table[1] & ~1;  // Reset handler (bit0=0 for Thumb)
+void cpu_reset(CortexM0_CPU *cpu)
+{
+  cpu->SP = vector_table[0];      // initilize stack pointer
+  cpu->PC = vector_table[1] & ~1; // Reset handler (bit0=0 for Thumb)
   cpu->APSR.all = 0;
 }
 
+void exception_entry(CortexM0_CPU *cpu, uint8_t exception_number)
+{
+  // Push registers (simplified)
+  PUSH(cpu, cpu->APSR.all);
+  PUSH(cpu, cpu->PC);
+  PUSH(cpu, cpu->LR);
+  PUSH(cpu, cpu->R[12]);
+  PUSH(cpu, cpu->R[3]);
+  PUSH(cpu, cpu->R[2]);
+  PUSH(cpu, cpu->R[1]);
+  PUSH(cpu, cpu->R[0]);
 
-void exception_entry(CortexM0_CPU *cpu, uint8_t exception_number) {
-    // Push registers (simplified)
-    PUSH(cpu, cpu->APSR.all);
-    PUSH(cpu, cpu->PC);
-    PUSH(cpu, cpu->LR);
-    PUSH(cpu, cpu->R[12]);
-    PUSH(cpu, cpu->R[3]);
-    PUSH(cpu, cpu->R[2]);
-    PUSH(cpu, cpu->R[1]);
-    PUSH(cpu, cpu->R[0]);
-
-    // cpu->LR = 0xFFFFFFF9; // Return to Thread mode using MSP
-    cpu->PC = vector_table[exception_number] & ~1; // Jump to handler
+  // cpu->LR = 0xFFFFFFF9; // Return to Thread mode using MSP
+  cpu->PC = vector_table[exception_number] & ~1; // Jump to handler
 }
 
-void exception_return(CortexM0_CPU *cpu) {
+void exception_return(CortexM0_CPU *cpu)
+{
   cpu->R[0] = POP(cpu);
   cpu->R[1] = POP(cpu);
   cpu->R[2] = POP(cpu);
@@ -123,7 +134,6 @@ void exception_return(CortexM0_CPU *cpu) {
   cpu->PC = POP(cpu);
   cpu->APSR.all = POP(cpu);
 }
-
 
 /**
  * @brief Stores the value of a register into memory.
@@ -137,24 +147,25 @@ void exception_return(CortexM0_CPU *cpu) {
  * @param Rn  Index of the base register used for address calculation.
  * @param Rm  Index of the offset register used for address calculation.
  */
-void STR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
+void STR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm)
+{
   // Ensure register is valid (not SP, LR, or PC)
-  if (Rt >= 13) {
-      printf("Invalid register for STR\n");
-      return;
+  if (Rt >= 13)
+  {
+    printf("Invalid register for STR\n");
+    return;
   }
 
   // Compute memory address
   uint32_t addr = cpu->R[Rm] + cpu->R[Rn];
   uint32_t value = cpu->R[Rt];
 
-  if (!mem_write32(addr, value)) {
+  if (!mem_write32(addr, value))
+  {
     raise_hardfault(cpu);
     return;
   }
-
 }
-
 
 /**
  * @brief Stores the halfword from register Rt into memory.
@@ -168,31 +179,23 @@ void STR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
  * @param Rn  Index of the base register used for address calculation.
  * @param Rm  Index of the offset register used for address calculation.
  */
-void STRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
-  if (Rt >= 13) {
-      printf("Invalid register for STRH\n");
-      return;
+void STRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm)
+{
+  if (Rt >= 13)
+  {
+    printf("Invalid register for STRH\n");
+    return;
   }
 
   uint32_t addr = cpu->R[Rn] + cpu->R[Rm];
+  uint16_t value = cpu->R[Rt] & 0xFFFF;
 
-  if (addr % HALFWORD_SIZE != 0) {
-      printf("Unaligned STRH access at 0x%08X\n", addr);
-      return;
+  if (!mem_write16(addr, value))
+  {
+    raise_hardfault(cpu);
+    return;
   }
-
-    // Check for memory boundry
-    if (!check_memory_bounds(addr, HALFWORD_SIZE)) {
-      printf("Memory access out of bounds at 0x%08X\n", addr);
-      return;
-    }
-
-  uint16_t halfword = cpu->R[Rt] & 0xFFFF;
-
-  Memory[addr]     = (uint8_t)(halfword & 0xFF);
-  Memory[addr + 1] = (uint8_t)(halfword >> 8);
 }
-
 
 /**
  * @brief Store Byte (STRB) instruction implementation for Cortex-M0 CPU emulator.
@@ -206,23 +209,23 @@ void STRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
  * @param Rn  Index of the base register used for address calculation.
  * @param Rm  Index of the register whose value is added to Rn for address calculation.
  */
-void STRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
-  if (Rt >= 13) {
-      printf("Invalid register for STRB\n");
-      return;
-  }
-
-  uint32_t addr = cpu->R[Rn] + cpu->R[Rm];
-
-  // Check for memory boundry
-  if (!check_memory_bounds(addr, BYTE_SIZE)) {
-    printf("Memory access out of bounds at 0x%08X\n", addr);
+void STRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm)
+{
+  if (Rt >= 13)
+  {
+    printf("Invalid register for STRB\n");
     return;
   }
 
-  Memory[addr]= (uint8_t)(cpu->R[Rt] & 0xFF);
-}
+  uint32_t addr = cpu->R[Rn] + cpu->R[Rm];
+  uint8_t value = cpu->R[Rt] & 0xFFU;
 
+  if (!mem_write8(addr, value))
+  {
+    raise_hardfault(cpu);
+    return;
+  }
+}
 
 /**
  * @brief Loads a value from memory into a register.
@@ -236,25 +239,50 @@ void STRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
  * @param Rn  Base register index used to compute the memory address.
  * @param Rm  Offset register index used to compute the memory address.
  */
-void LDR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
+void LDR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm)
+{
   // Ensure register is valid (not SP, LR, or PC)
-  if (Rt >= 13) {
-      printf("Invalid register for LDR\n");
-      return;
-  }
+  check_Rt_validity(Rt, "LDR");
 
   // Compute memory address
   uint32_t addr = cpu->R[Rm] + cpu->R[Rn];
 
- 
   uint32_t value;
-  if (!mem_read32(addr, &value)) {
+  if (!mem_read32(addr, &value))
+  {
     raise_hardfault(cpu);
     return;
   }
   cpu->R[Rt] = value;
 }
 
+/**
+ * @brief Executes the LDRB (Load Register Byte) instruction for the Cortex-M0 CPU emulator.
+ *
+ * This function loads a byte from memory, addressed by the sum of registers Rn and Rm,
+ * and stores the result into register Rt. The loaded byte is zero-extended to 32 bits.
+ *
+ * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
+ * @param Rt  Destination register index where the loaded byte will be stored.
+ * @param Rn  Base register index used for memory address calculation.
+ * @param Rm  Offset register index added to the base register for address calculation.
+ */
+void LDRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm)
+{
+  // Ensure register is valid (not SP, LR, or PC)
+  check_Rt_validity(Rt, "LDRB");
+
+  // Compute memory address
+  uint32_t addr = cpu->R[Rm] + cpu->R[Rn];
+
+  int32_t value;
+  if (!mem_read8(addr, &value))
+  {
+    raise_hardfault(cpu);
+    return;
+  }
+  cpu->R[Rt] = value;
+}
 
 /**
  * @brief Executes the LDRH (Load Register Halfword) instruction for the Cortex-M0 CPU.
@@ -267,33 +295,22 @@ void LDR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
  * @param Rn  Base register index used to calculate the memory address.
  * @param Rm  Offset register index used to calculate the memory address.
  */
-void LDRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
+void LDRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm)
+{
   // Ensure register is valid (not SP, LR, or PC)
-  if (Rt >= 13) {
-      printf("Invalid register for LDR\n");
-      return;
-  }
+  check_Rt_validity(Rt, "LDRH");
 
   // Compute memory address
   uint32_t addr = cpu->R[Rm] + cpu->R[Rn];
 
-  // Check for alignment (Cortex-M0 usually requires word alignment for 32-bit stores)
-  if (addr % HALFWORD_SIZE != 0) {
-    printf("Unaligned memory access at 0x%08X\n", addr);
+  int32_t value;
+  if (!mem_read16(addr, &value))
+  {
+    raise_hardfault(cpu);
     return;
   }
-
-  // Check for memory boundry
-  if (!check_memory_bounds(addr, HALFWORD_SIZE)) {
-    printf("Memory access out of bounds at 0x%08X\n", addr);
-    return;
-  }
-
-  // Load the 16-bit value memory to the register
-  cpu->R[Rt] = (uint16_t)Memory[addr] |
-                 (Memory[addr + 1] << 8);
+  cpu->R[Rt] = value;
 }
-
 
 /**
  * @brief Executes the LDRSH (Load Register Signed Halfword) instruction for the Cortex-M0 CPU.
@@ -307,57 +324,21 @@ void LDRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
  * @param Rn  Base register index used to calculate the memory address.
  * @param Rm  Offset register index used to calculate the memory address.
  */
-void LDRSH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
-  if (Rt >= 13) {
-      printf("Invalid register for LDRSH\n");
-      return;
-  }
+void LDRSH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm)
+{
+ check_Rt_validity(Rt, "LDRSH");
 
   uint32_t addr = cpu->R[Rn] + cpu->R[Rm];
-
-  if (addr % 2 != 0) {
-      printf("Unaligned LDRSH access at 0x%08X\n", addr);
-      return;
-  }
-
-  int16_t halfword = (int16_t)(Memory[addr] |
-                               (Memory[addr + 1] << 8));
-
-  cpu->R[Rt] = (int32_t)halfword;  // Sign-extend to 32-bit
-}
-
-
-/**
- * @brief Executes the LDRB (Load Register Byte) instruction for the Cortex-M0 CPU emulator.
- *
- * This function loads a byte from memory, addressed by the sum of registers Rn and Rm,
- * and stores the result into register Rt. The loaded byte is zero-extended to 32 bits.
- *
- * @param cpu Pointer to the CortexM0_CPU structure representing the CPU state.
- * @param Rt  Destination register index where the loaded byte will be stored.
- * @param Rn  Base register index used for memory address calculation.
- * @param Rm  Offset register index added to the base register for address calculation.
- */
-void LDRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
-  // Ensure register is valid (not SP, LR, or PC)
-  if (Rt >= 13) {
-      printf("Invalid register for LDRB\n");
-      return;
-  }
-
-  // Compute memory address
-  uint32_t addr = cpu->R[Rm] + cpu->R[Rn];
-
-  // Check for memory boundry
-  if (!check_memory_bounds(addr, BYTE_SIZE)) {
-    printf("Memory access out of bounds at 0x%08X\n", addr);
+  int16_t halfword;
+  
+  if (!mem_read16(addr, &halfword))
+  {
+    raise_hardfault(cpu);
     return;
   }
-
-  // Load the 8-bit value memory to the register
-  cpu->R[Rt] = (uint8_t)Memory[addr];
+  
+  cpu->R[Rt] = (int32_t)halfword; // Sign-extend to 32-bit
 }
-
 
 /**
  * @brief Executes the LDRSB (Load Register Signed Byte) instruction for the Cortex-M0 CPU.
@@ -370,64 +351,34 @@ void LDRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
  * @param Rn  Base register index used to calculate the memory address.
  * @param Rm  Offset register index used to calculate the memory address.
  */
-void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm) {
+void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm)
+{
   // Ensure register is valid (not SP, LR, or PC)
-  if (Rt >= 13) {
-      printf("Invalid register for LDRSB\n");
-      return;
-  }
+  check_Rt_validity(Rt, "LDRSB");
 
   // Compute memory address
   uint32_t addr = cpu->R[Rm] + cpu->R[Rn];
 
-  // Check for memory boundry
-  if (!check_memory_bounds(addr, BYTE_SIZE)) {
-    printf("Memory access out of bounds at 0x%08X\n", addr);
+  int8_t byte;
+  if (!mem_read16(addr, &byte))
+  {
+    raise_hardfault(cpu);
     return;
   }
-
-
   // Load signed 8-bit and sign-extend to 32-bit
-  cpu->R[Rt] = (int32_t)((int8_t)Memory[addr]);
+  cpu->R[Rt] = (int32_t)byte;
 }
 
-void PUSH(CortexM0_CPU *cpu, uint32_t value)
-{
-  
-  cpu->SP -= 4;
-  assert((cpu->SP & 0x3) == 0); // word alignment
-  assert(cpu->SP <= Stack_size - 4);
-  // Store the 32-bit register value in stack
-  Stack[cpu->SP ] = value & 0xFF;
-  Stack[cpu->SP + 1] = (value >> 8) & 0xFF;
-  Stack[cpu->SP + 2] = (value >> 16) & 0xFF;
-  Stack[cpu->SP + 3] = (value >> 24) & 0xFF;
-  
-}
-
-uint32_t POP(CortexM0_CPU *cpu)
-{
-  assert((cpu->SP & 0x3) == 0); // word alignment
-  assert(cpu->SP <= Stack_size - 4);
-  // Load 32-bit value from the stack into the target register
-  uint32_t value = 0; 
-  value = Stack[cpu->SP] & 0xFF;
-  value |= (Stack[cpu->SP + 1] & 0xFF) << 8;
-  value |= (Stack[cpu->SP + 2] & 0xFF) << 16;
-  value |= (Stack[cpu->SP + 3] & 0xFF) << 24;
-
-  cpu->SP += 4;
-  return value;
-}
 
 /**
-* @brief Move (immediate) writes an immediate value to the destination register. The condition flags are updated based on
-* the result.
-*/
+ * @brief Move (immediate) writes an immediate value to the destination register. The condition flags are updated based on
+ * the result.
+ */
 
-void MOVS(CortexM0_CPU *cpu, uint8_t Rd, uint8_t imm8){
+void MOVS(CortexM0_CPU *cpu, uint8_t Rd, uint8_t imm8)
+{
   assert(Rd <= 7 && "MOVS #imm8 only supports R0-R7");
-  
+
   cpu->R[Rd] = imm8 & (0xFF);
 
   update_flags(cpu, (uint32_t)(imm8 & (0xFF)), 0, 0);
@@ -439,68 +390,73 @@ void MOVS(CortexM0_CPU *cpu, uint8_t Rd, uint8_t imm8){
  * @brief Move (register) copies the value from the source register to the destination register. The condition flags are updated based on
  * the result.
  */
-void MOVS_REG(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm){
+void MOVS_REG(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm)
+{
   assert(Rd <= 7 && "MOVS_REG only supports R0-R7");
-  assert(Rm <= 7 && "MOVS_REG only supports R0-R7");  
+  assert(Rm <= 7 && "MOVS_REG only supports R0-R7");
   cpu->R[Rd] = cpu->R[Rm];
   update_flags(cpu, cpu->R[Rd], 0, 0);
   return;
-
 }
 
 /**
-* @brief Logical Shift Left (immediate) shifts the value in the source register left by the specified immediate amount
-* and stores the result in the destination register. The condition flags are updated  based on the result.
-*/  
+ * @brief Logical Shift Left (immediate) shifts the value in the source register left by the specified immediate amount
+ * and stores the result in the destination register. The condition flags are updated  based on the result.
+ */
 
-void LSL(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm,uint32_t immediate){
+void LSL(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm, uint32_t immediate)
+{
 
   assert(Rm < 13 && "LSL: Source only supports R0-R12");
   assert(Rd < 13 && "LSL: Source only supports R0-R12");
 
   uint32_t shift = immediate & 0x1F; // Only lower 5 bits are valid for shift amount
   uint8_t carry_out = 0;
-  
-  if (shift == 0) {
+
+  if (shift == 0)
+  {
     // Shift of zero: carry does NOT change
-    carry_out = cpu->APSR.Bits.APSR_C;  // unchanged
+    carry_out = cpu->APSR.Bits.APSR_C; // unchanged
     cpu->R[Rd] = cpu->R[Rm];
   }
-  else if (shift < 32) {
-    carry_out = (cpu->R[Rm] >> (32 - shift)) & 1;  // last bit shifted out
+  else if (shift < 32)
+  {
+    carry_out = (cpu->R[Rm] >> (32 - shift)) & 1; // last bit shifted out
     cpu->R[Rd] = (uint32_t)(cpu->R[Rm] << shift);
   }
-  else { 
+  else
+  {
     // Shift >= 32 → result = 0, carry = 0
     carry_out = 0;
     cpu->R[Rd] = 0;
-}
+  }
 
   update_flags(cpu, cpu->R[Rd], carry_out, 0);
   return;
 }
 
-
 /**
-* @brief Logical Shift Right (immediate) shifts the value in the source register right by the specified immediate amount
-* and stores the result in the destination register. The condition flags are updated  based on the result.
-*/  
+ * @brief Logical Shift Right (immediate) shifts the value in the source register right by the specified immediate amount
+ * and stores the result in the destination register. The condition flags are updated  based on the result.
+ */
+void LSR(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm, uint32_t immediate)
+{
 
-void LSR(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm,uint32_t immediate){
-
-  assert(Rm < 13 && "LSR: Source only supports R0-R12");
-  assert(Rd < 13 && "LSR: Source only supports R0-R12");
+  assert(Rm < 13 && "LSR: Rm supports R0-R12");
+  assert(Rd < 13 && "LSR: Rd supports R0-R12");
 
   uint32_t shift = immediate & 0x1F; // Only lower 5 bits are valid for shift amount
   uint8_t carry_out = 0;
-  
-  if (shift == 0) {
+
+  if (shift == 0)
+  {
     //  ARMv6-M semantics: LSR #0 means LSR #32
-    carry_out = (cpu->R[Rm] >> 31) & 1;  //  bit 31 becomes carry
-    cpu->R[Rd] = 0; // shifting 32 bits → result = 0
+    carry_out = (cpu->R[Rm] >> 31) & 1; //  bit 31 becomes carry
+    cpu->R[Rd] = 0;                     // shifting 32 bits → result = 0
   }
-  else{
-    carry_out = (cpu->R[Rm] >> (shift - 1)) & 1;  // last bit shifted out
+  else
+  {
+    carry_out = (cpu->R[Rm] >> (shift - 1)) & 1; // last bit shifted out
     cpu->R[Rd] = (uint32_t)(cpu->R[Rm] >> shift);
   }
 
@@ -508,9 +464,17 @@ void LSR(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm,uint32_t immediate){
   return;
 }
 
+void raise_hardfault(CortexM0_CPU *cpu){
+  // cpu->exception_pending = HARDFAULT;
+  printf("HardFault raised due to invalid memory access or unaligned access.\n");
+  return;
+}
 
-// void raise_hardfault(CortexM0_CPU *cpu){
-//     cpu->exception_pending = HARDFAULT;
-// }
-
-
+void check_Rt_validity(uint8_t Rt, const char *instruction_name)
+{
+  if (Rt >= 13)
+  {
+    printf("Invalid register for %s\n", instruction_name);
+    return;
+  }
+}
