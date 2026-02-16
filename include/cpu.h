@@ -42,6 +42,8 @@ typedef struct {
     APSR_t APSR;     // Application Program Status Register (Flags)
 } CortexM0_CPU;
 
+
+
 /********************Functions Declaration************************ */
 
 
@@ -49,6 +51,25 @@ typedef struct {
 void init_cpu(CortexM0_CPU *cpu);
 void print_cpu_state(CortexM0_CPU *cpu);
 void update_flags(CortexM0_CPU *cpu, uint32_t result, _Bool carry, _Bool overflow);
+
+void STR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
+void STRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
+void STRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
+void LDR(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
+void LDRH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
+void LDRSH(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
+void LDRB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
+void LDRSB(CortexM0_CPU *cpu, uint8_t Rt, uint8_t Rn, uint8_t Rm);
+void PUSH(CortexM0_CPU *cpu, uint32_t value);
+uint32_t POP(CortexM0_CPU *cpu);
+
+void MOVS(CortexM0_CPU *cpu, uint8_t Rd, uint8_t imm8);
+void MOVS_REG(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm);
+
+void LSL(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm,uint32_t immediate);
+void LSR(CortexM0_CPU *cpu, uint8_t Rd, uint8_t Rm,uint32_t immediate);
+
+void raise_hardfault(CortexM0_CPU *cpu);
 
 
 #endif // CPU_H
